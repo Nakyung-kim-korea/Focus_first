@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus_First</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6f0;
+    --warm-white: #fff9f3;
+    --orange: #ff6b35;
+    --orange-soft: #ff8c5a;
+    --orange-pale: #fff0e8;
+    --red: #e63946;
+    --red-pale: #ffeaea;
+    --yellow: #f4a261;
+    --yellow-pale: #fff5e6;
+    --green: #2a9d8f;
+    --green-pale: #e8f8f6;
+    --blue: #457b9d;
+    --blue-pale: #eaf3fa;
+    --text-dark: #1a1208;
+    --text-mid: #5c4d3a;
+    --text-light: #a89880;
+    --border: #e8ddd0;
+    --shadow: rgba(100, 60, 20, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* Subtle texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 20%, rgba(255,107,53,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(42,157,143,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    animation: fadeDown 0.5s ease;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .brand-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+  }
+
+  .brand-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 900;
+    color: var(--text-dark);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .brand-name span { color: var(--orange); }
+
+  .header-stats {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 4px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-light);
+    letter-spacing: 1px;
+  }
+
+  /* ── API Key bar ── */
+  .api-bar {
+    background: var(--orange-pale);
+    border: 1.5px dashed #ffc4a8;
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.5s ease 0.1s both;
+    flex-wrap: wrap;
+  }
+
+  .api-bar-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    white-space: nowrap;
+  }
+
+  .api-bar input {
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .api-bar input:focus { border-color: var(--orange); }
+
+  .btn-api {
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-api:hover { background: var(--orange-soft); transform: translateY(-1px); }
+
+  .api-saved {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+    display: none;
+  }
+
+  /* ── Input section ── */
+  .input-section {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 24px var(--shadow);
+    animation: fadeUp 0.5s ease 0.15s both;
+  }
+
+  .input-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  textarea {
+    flex: 1;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 18px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 15px;
+    color: var(--text-dark);
+    resize: none;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+
+  textarea:focus { border-color: var(--orange); }
+  textarea::placeholder { color: var(--text-light); }
+
+  .input-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 14px;
+    padding: 13px 18px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-analyze {
+    background: var(--text-dark);
+    color: var(--cream);
+  }
+  .btn-analyze:hover { background: var(--orange); transform: translateY(-1px); }
+
+  .btn-voice {
+    background: var(--cream);
+    color: var(--text-mid);
+    border: 1.5px solid var(--border);
+  }
+  .btn-voice:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-voice.on {
+    background: var(--red-pale);
+    border-color: var(--red);
+    color: var(--red);
+    animation: breathe 1.5s ease infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(230,57,70,0); }
+  }
+
+  /* AI thinking */
+  .ai-thinking {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--orange-pale);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--orange);
+    font-weight: 500;
+  }
+
+  .ai-thinking.show { display: flex; }
+
+  .dot-pulse {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .dot-pulse span {
+    width: 6px;
+    height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+    animation: dotPulse 1.2s ease infinite;
+  }
+
+  .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+  .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dotPulse {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── Board ── */
+  .board-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+
+  .board-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  .btn-clear {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-clear:hover { border-color: var(--red); color: var(--red); }
+
+  /* Priority columns */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    animation: fadeUp 0.5s ease 0.25s both;
+  }
+
+  @media (max-width: 600px) {
+    .board { grid-template-columns: 1fr; }
+  }
+
+  .column {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    min-height: 180px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  .col-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .col-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .col-urgent .col-dot { background: var(--red); }
+  .col-high .col-dot { background: var(--yellow); }
+  .col-medium .col-dot { background: var(--blue); }
+  .col-low .col-dot { background: var(--green); }
+
+  .col-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .col-urgent .col-name { color: var(--red); }
+  .col-high .col-name { color: var(--yellow); }
+  .col-medium .col-name { color: var(--blue); }
+  .col-low .col-name { color: var(--green); }
+
+  .col-count {
+    margin-left: auto;
+    background: var(--cream);
+    border-radius: 20px;
+    padding: 2px 9px;
+    font-size: 12px;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  /* Task cards */
+  .task-card {
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: cardIn 0.35s ease both;
+    cursor: default;
+  }
+
+  .task-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow); }
+
+  .col-urgent .task-card { background: var(--red-pale); border: 1.5px solid #ffc8cc; }
+  .col-high .task-card { background: var(--yellow-pale); border: 1.5px solid #ffd9aa; }
+  .col-medium .task-card { background: var(--blue-pale); border: 1.5px solid #b8d4e8; }
+  .col-low .task-card { background: var(--green-pale); border: 1.5px solid #a8e0da; }
+
+  .task-card.done { opacity: 0.4; }
+  .task-card.done .task-text { text-decoration: line-through; }
+
+  .task-text {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    padding-right: 24px;
+  }
+
+  .task-reason {
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  .task-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .task-time {
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .alarm-badge {
+    font-size: 11px;
+    color: var(--orange);
+    font-weight: 600;
+    background: var(--orange-pale);
+    border-radius: 6px;
+    padding: 2px 7px;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 5px;
+  }
+
+  .btn-card {
+    border: 1.5px solid transparent;
+    border-radius: 8px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: var(--text-mid);
+    transition: all 0.15s;
+  }
+
+  .btn-card:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-done:hover { border-color: var(--green) !important; color: var(--green) !important; }
+  .btn-del:hover { border-color: var(--red) !important; color: var(--red) !important; }
+
+  /* Empty column */
+  .col-empty {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-light);
+    font-size: 13px;
+  }
+
+  /* ── Alarm Modal ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.5);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overlay.show { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    width: 90%;
+    max-width: 380px;
+    box-shadow: 0 24px 60px rgba(100,60,20,0.2);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-icon { font-size: 32px; margin-bottom: 10px; }
+
+  .modal h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .modal-task {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 22px;
+    line-height: 1.5;
+    padding: 10px 14px;
+    background: var(--cream);
+    border-radius: 10px;
+  }
+
+  .modal label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-mid);
+    display: block;
+    margin-bottom: 7px;
+    letter-spacing: 0.5px;
+  }
+
+  .modal input[type="date"],
+  .modal input[type="time"] {
+    width: 100%;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    outline: none;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .modal input:focus { border-color: var(--orange); }
+
+  .modal-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .btn-modal-cancel {
+    flex: 1;
+    background: var(--cream);
+    color: var(--text-mid);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-modal-confirm {
+    flex: 1;
+    background: var(--text-dark);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-modal-confirm:hover { background: var(--orange); }
+
+  /* ── Alarm Popup ── */
+  .alarm-popup {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: white;
+    border: 2px solid var(--orange);
+    border-radius: 18px;
+    padding: 18px 22px;
+    max-width: 300px;
+    z-index: 200;
+    box-shadow: 0 12px 40px rgba(255,107,53,0.25);
+    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .alarm-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .alarm-popup-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .alarm-popup-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-light);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .alarm-popup p {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.4;
+  }
+
+  /* ── Empty state ── */
+  .empty-board {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+  }
+
+  .empty-board-icon { font-size: 52px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-board p { font-size: 14px; line-height: 1.7; }
+
+  /* ── Save / Load Section ── */
+  .save-section {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 24px 28px;
+    margin-top: 32px;
+    box-shadow: 0 4px 24px var(--shadow);
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+
+  .save-section-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .save-section-sub {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .save-btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .btn-save {
+    background: var(--text-dark);
+    color: var(--cream);
+    border: none;
+    border-radius: 12px;
+    padding: 13px 20px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn-save:hover { background: var(--orange); transform: translateY(-1px); }
+
+  .btn-load {
+    background: var(--cream);
+    color: var(--text-mid);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 20px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn-load:hover { border-color: var(--orange); color: var(--orange); }
+
+  .btn-load-file {
+    background: var(--green-pale);
+    color: var(--green);
+    border: 1.5px solid #a8e0da;
+    border-radius: 12px;
+    padding: 13px 20px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn-load-file:hover { background: var(--green); color: white; border-color: var(--green); }
+
+  /* History list */
+  .history-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-item {
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .history-item:hover { border-color: var(--orange); background: var(--orange-pale); }
+
+  .history-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .history-info { flex: 1; min-width: 0; }
+
+  .history-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-meta {
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .history-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-hist {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: var(--text-mid);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-hist-restore:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-hist-del:hover { border-color: var(--red); color: var(--red); }
+
+  .history-empty {
+    text-align: center;
+    padding: 28px;
+    color: var(--text-light);
+    font-size: 13px;
+    background: var(--cream);
+    border-radius: 14px;
+    border: 1.5px dashed var(--border);
+  }
+
+  .save-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text-dark);
+    color: var(--cream);
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 300;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .save-toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <span class="brand-tag">AI Priority Manager</span>
+      <h1 class="brand-name">Focus<span>_</span>First</h1>
+    </div>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-num" id="statTotal">0</span>
+        <span class="stat-label">전체</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="statUrgent" style="color:var(--red)">0</span>
+        <span class="stat-label">긴급</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="statDone" style="color:var(--green)">0</span>
+        <span class="stat-label">완료</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- API Key -->
+  <div class="api-bar">
+    <span class="api-bar-label">🔑 API 키</span>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api..." />
+    <button class="btn-api" onclick="saveKey()">저장</button>
+    <span class="api-saved" id="apiSaved">✓ 연결됨</span>
+  </div>
+
+  <!-- Input -->
+  <div class="input-section">
+    <div class="input-section-title">할 일 추가</div>
+    <div class="input-row">
+      <textarea id="taskInput" placeholder="머릿속에 있는 할 일을 전부 쏟아내 보세요.&#10;여러 개를 한 번에 입력해도 괜찮아요!&#10;(Ctrl+Enter 로 분석)"></textarea>
+      <div class="input-btns">
+        <button class="btn btn-analyze" onclick="analyze()">✦ AI 분석</button>
+        <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()">🎤 음성</button>
+      </div>
+    </div>
+    <div class="ai-thinking" id="aiThinking">
+      <div class="dot-pulse"><span></span><span></span><span></span></div>
+      AI가 우선순위를 분석하고 있어요...
+    </div>
+  </div>
+
+  <!-- Board -->
+  <div class="board-header">
+    <span class="board-title">우선순위 보드</span>
+    <button class="btn-clear" onclick="clearDone()">완료 항목 삭제</button>
+  </div>
+
+  <div class="board" id="board">
+    <div class="column col-urgent" id="col-urgent">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <span class="col-name">긴급</span>
+        <span class="col-count" id="cnt-urgent">0</span>
+      </div>
+      <div class="col-empty" id="empty-urgent">아직 없어요 👍</div>
+    </div>
+    <div class="column col-high" id="col-high">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <span class="col-name">높음</span>
+        <span class="col-count" id="cnt-high">0</span>
+      </div>
+      <div class="col-empty" id="empty-high">아직 없어요 👍</div>
+    </div>
+    <div class="column col-medium" id="col-medium">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <span class="col-name">보통</span>
+        <span class="col-count" id="cnt-medium">0</span>
+      </div>
+      <div class="col-empty" id="empty-medium">아직 없어요 👍</div>
+    </div>
+    <div class="column col-low" id="col-low">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <span class="col-name">낮음</span>
+        <span class="col-count" id="cnt-low">0</span>
+      </div>
+      <div class="col-empty" id="empty-low">아직 없어요 👍</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Save / Load Section -->
+<div class="save-section">
+  <div class="save-section-title">💾 저장 &amp; 불러오기</div>
+  <div class="save-section-sub">현재 목록을 저장하거나, 이전에 저장한 목록을 다시 불러올 수 있어요.</div>
+
+  <div class="save-btn-row">
+    <button class="btn-save" onclick="saveSnapshot()">💾 현재 목록 저장</button>
+    <button class="btn-load-file" onclick="exportJSON()">📤 파일로 내보내기</button>
+    <label class="btn-load" style="cursor:pointer;">
+      📂 파일 불러오기
+      <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="importJSON(event)" />
+    </label>
+  </div>
+
+  <div class="history-title">
+    <span>저장된 목록</span>
+    <button class="btn-hist" onclick="clearHistory()" style="font-size:11px; padding:4px 10px;">전체 삭제</button>
+  </div>
+
+  <div class="history-list" id="historyList">
+    <div class="history-empty">아직 저장된 목록이 없어요.<br>위의 버튼으로 현재 목록을 저장해 보세요!</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="save-toast" id="saveToast"></div>
+
+<!-- Alarm Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-icon">⏰</div>
+    <h3>알람 설정</h3>
+    <div class="modal-task" id="modalTaskText"></div>
+    <label>날짜</label>
+    <input type="date" id="alarmDate" />
+    <label>시간</label>
+    <input type="time" id="alarmTime" />
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-modal-confirm" onclick="setAlarm()">알람 설정</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let tasks = [];
+  let apiKey = '';
+  let alarmTarget = null;
+  let recognition = null;
+  let isRecording = false;
+
+  // ── API Key ──
+  function saveKey() {
+    apiKey = document.getElementById('apiKeyInput').value.trim();
+    if (apiKey) {
+      const saved = document.getElementById('apiSaved');
+      saved.style.display = 'inline';
+      setTimeout(() => saved.style.display = 'none', 3000);
+    }
+  }
+
+  // ── Voice ──
+  function toggleVoice() {
+    const btn = document.getElementById('voiceBtn');
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('Chrome 브라우저에서만 음성 인식이 가능해요!');
+      return;
+    }
+    if (isRecording) { recognition.stop(); return; }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let base = document.getElementById('taskInput').value;
+
+    recognition.onstart = () => {
+      isRecording = true;
+      btn.textContent = '⏹ 중지';
+      btn.classList.add('on');
+    };
+
+    recognition.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) base += e.results[i][0].transcript + ' ';
+        else interim += e.results[i][0].transcript;
+      }
+      document.getElementById('taskInput').value = base + interim;
+    };
+
+    recognition.onend = () => {
+      isRecording = false;
+      btn.textContent = '🎤 음성';
+      btn.classList.remove('on');
+    };
+
+    recognition.start();
+  }
+
+  // ── Analyze ──
+  async function analyze() {
+    const input = document.getElementById('taskInput').value.trim();
+    if (!input) return;
+    if (!apiKey) { alert('API 키를 먼저 입력해 주세요!'); return; }
+
+    const thinking = document.getElementById('aiThinking');
+    thinking.classList.add('show');
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: `ADHD를 가진 사람을 돕는 우선순위 도우미입니다.
+입력된 할 일을 분석해 JSON 배열만 반환하세요. 다른 텍스트 없이 순수 JSON만.
+
+형식:
+[{"task":"할 일","priority":"urgent|high|medium|low","reason":"이유 15자 이내","estimatedTime":"예상시간"}]
+
+기준:
+- urgent: 오늘 마감, 즉시 필요
+- high: 중요하고 곧 해야 함
+- medium: 중요하지만 여유 있음
+- low: 나중에 해도 됨`,
+          messages: [{ role: 'user', content: `다음을 우선순위 분류해줘:\n${input}` }]
+        })
+      });
+
+      const data = await res.json();
+      const text = data.content[0].text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(text);
+
+      parsed.forEach(item => tasks.push({
+        ...item,
+        id: Date.now() + Math.random(),
+        done: false,
+        alarm: null
+      }));
+
+      renderBoard();
+      document.getElementById('taskInput').value = '';
+    } catch (e) {
+      alert('오류가 발생했어요. API 키를 확인해 주세요.');
+      console.error(e);
+    }
+
+    thinking.classList.remove('show');
+  }
+
+  // ── Render ──
+  function renderBoard() {
+    const priorities = ['urgent', 'high', 'medium', 'low'];
+
+    priorities.forEach(p => {
+      const col = document.getElementById(`col-${p}`);
+      const empty = document.getElementById(`empty-${p}`);
+      const cnt = document.getElementById(`cnt-${p}`);
+      const items = tasks.filter(t => t.priority === p);
+
+      // Remove old cards
+      col.querySelectorAll('.task-card').forEach(c => c.remove());
+
+      cnt.textContent = items.filter(t => !t.done).length;
+      empty.style.display = items.length === 0 ? 'block' : 'none';
+
+      items.forEach((t, i) => {
+        const card = document.createElement('div');
+        card.className = `task-card${t.done ? ' done' : ''}`;
+        card.style.animationDelay = `${i * 0.05}s`;
+        card.innerHTML = `
+          <div class="task-text">${t.task}</div>
+          <div class="task-reason">${t.reason}</div>
+          <div class="task-footer">
+            <span class="task-time">⏱ ${t.estimatedTime || '?'}</span>
+            ${t.alarm ? `<span class="alarm-badge">⏰ ${t.alarm}</span>` : ''}
+            <div class="card-actions">
+              ${!t.done ? `<button class="btn-card btn-done" onclick="markDone('${t.id}')">✓</button>` : ''}
+              <button class="btn-card" onclick="openModal('${t.id}', \`${t.task.replace(/`/g,"'")}\`)">⏰</button>
+              <button class="btn-card btn-del" onclick="deleteTask('${t.id}')">✕</button>
+            </div>
+          </div>
+        `;
+        col.appendChild(card);
+      });
+    });
+
+    updateStats();
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent = tasks.filter(t => !t.done).length;
+    document.getElementById('statUrgent').textContent = tasks.filter(t => t.priority === 'urgent' && !t.done).length;
+    document.getElementById('statDone').textContent = tasks.filter(t => t.done).length;
+  }
+
+  function markDone(id) {
+    const t = tasks.find(t => String(t.id) === String(id));
+    if (t) { t.done = true; renderBoard(); }
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => String(t.id) !== String(id));
+    renderBoard();
+  }
+
+  function clearDone() {
+    tasks = tasks.filter(t => !t.done);
+    renderBoard();
+  }
+
+  // ── Alarm ──
+  function openModal(id, name) {
+    alarmTarget = id;
+    document.getElementById('modalTaskText').textContent = name;
+    const now = new Date();
+    document.getElementById('alarmDate').value = now.toISOString().split('T')[0];
+    document.getElementById('alarmTime').value = now.toTimeString().slice(0, 5);
+    document.getElementById('overlay').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('show');
+    alarmTarget = null;
+  }
+
+  function setAlarm() {
+    if (!alarmTarget) return;
+    const date = document.getElementById('alarmDate').value;
+    const time = document.getElementById('alarmTime').value;
+    const ms = new Date(`${date}T${time}`).getTime() - Date.now();
+
+    const t = tasks.find(t => String(t.id) === String(alarmTarget));
+    if (t) {
+      t.alarm = time;
+      renderBoard();
+      if (ms > 0) setTimeout(() => showAlarmPopup(t.task), ms);
+    }
+    closeModal();
+  }
+
+  function showAlarmPopup(taskName) {
+    const popup = document.createElement('div');
+    popup.className = 'alarm-popup';
+    popup.innerHTML = `
+      <div class="alarm-popup-header">
+        <span class="alarm-popup-title">⏰ 지금 해야 해요!</span>
+        <button class="alarm-popup-close" onclick="this.parentElement.parentElement.remove()">×</button>
+      </div>
+      <p>${taskName}</p>
+    `;
+    document.body.appendChild(popup);
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Focus_First', { body: taskName });
+    }
+    setTimeout(() => popup?.remove(), 8000);
+  }
+
+  // ── Save / Load ──
+  let history = [];
+
+  function saveSnapshot() {
+    if (tasks.length === 0) { showToast('저장할 항목이 없어요!'); return; }
+    const now = new Date();
+    const label = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const snap = {
+      id: Date.now(),
+      label,
+      date: now.toISOString(),
+      tasks: JSON.parse(JSON.stringify(tasks))
+    };
+    history.unshift(snap);
+    renderHistory();
+    showToast('✓ 저장됐어요!');
+  }
+
+  function restoreSnapshot(id) {
+    const snap = history.find(h => h.id === id);
+    if (!snap) return;
+    tasks = JSON.parse(JSON.stringify(snap.tasks));
+    renderBoard();
+    showToast('✓ 불러왔어요!');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function deleteSnapshot(id) {
+    history = history.filter(h => h.id !== id);
+    renderHistory();
+    showToast('삭제됐어요.');
+  }
+
+  function clearHistory() {
+    if (history.length === 0) return;
+    history = [];
+    renderHistory();
+    showToast('전체 삭제됐어요.');
+  }
+
+  function exportJSON() {
+    if (tasks.length === 0) { showToast('내보낼 항목이 없어요!'); return; }
+    const data = JSON.stringify({ exportedAt: new Date().toISOString(), tasks }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `focus_first_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📤 파일로 내보냈어요!');
+  }
+
+  function importJSON(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        const imported = data.tasks || data;
+        if (!Array.isArray(imported)) throw new Error();
+        tasks = imported;
+        renderBoard();
+        showToast(`✓ ${imported.length}개 항목을 불러왔어요!`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch {
+        showToast('❌ 파일을 읽을 수 없어요.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (history.length === 0) {
+      list.innerHTML = '<div class="history-empty">아직 저장된 목록이 없어요.<br>위의 버튼으로 현재 목록을 저장해 보세요!</div>';
+      return;
+    }
+    list.innerHTML = history.map(h => {
+      const total = h.tasks.length;
+      const done = h.tasks.filter(t => t.done).length;
+      const urgent = h.tasks.filter(t => t.priority === 'urgent' && !t.done).length;
+      return `
+        <div class="history-item">
+          <div class="history-icon">📋</div>
+          <div class="history-info">
+            <div class="history-name">${h.label} 저장본</div>
+            <div class="history-meta">
+              <span>전체 ${total}개</span>
+              ${urgent > 0 ? `<span style="color:var(--red)">긴급 ${urgent}개</span>` : ''}
+              <span style="color:var(--green)">완료 ${done}개</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="btn-hist btn-hist-restore" onclick="restoreSnapshot(${h.id})">불러오기</button>
+            <button class="btn-hist btn-hist-del" onclick="deleteSnapshot(${h.id})">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('saveToast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // Notification permission
+  if ('Notification' in window) Notification.requestPermission();
+
+  // Ctrl+Enter shortcut
+  document.getElementById('taskInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) analyze();
+  });
+
+  // Close overlay on backdrop click
+  document.getElementById('overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>
